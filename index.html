@@ -3,6 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!--
+  Google Analytics (GA4) -- replace G-XXXXXXXXXX in BOTH lines below with
+  your own Measurement ID:
+    1. analytics.google.com -> Admin -> Create property (if you don't have
+       one yet) -> Data Streams -> Web -> add this page's URL.
+    2. Copy the Measurement ID it gives you (starts with "G-").
+    3. Paste it over G-XXXXXXXXXX in the <script src="...id=G-XXXXXXXXXX">
+       line AND in the gtag('config', 'G-XXXXXXXXXX') line just below it.
+  Until you do that, this snippet loads but reports to a nonexistent
+  property, so nothing breaks -- it just isn't tracking anything real yet.
+-->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+
 <title>Survival Odds</title>
 <meta name="description" content="A real 1928–2025 backtest, computed live in your browser — drag stock allocation and horizon, watch survival odds reshape, then drill into every individual starting year.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,6 +47,9 @@
     --shadow: 0 1px 2px rgba(15, 61, 120, 0.06), 0 12px 32px rgba(15, 61, 120, 0.08);
     --tooltip-bg: #0b1220;
     --tooltip-ink: #eef3fb;
+    --highlight-bg: #fef3c7;
+    --highlight-border: #f3d783;
+    --highlight-ink: #7a4a03;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
@@ -49,6 +71,9 @@
       --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 20px 48px rgba(0, 0, 0, 0.45);
       --tooltip-bg: #eef3fb;
       --tooltip-ink: #0b1220;
+      --highlight-bg: #3a2c0f;
+      --highlight-border: #5c4419;
+      --highlight-ink: #ffcf4d;
     }
   }
   :root[data-theme="dark"] {
@@ -70,6 +95,9 @@
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 20px 48px rgba(0, 0, 0, 0.45);
     --tooltip-bg: #eef3fb;
     --tooltip-ink: #0b1220;
+    --highlight-bg: #3a2c0f;
+    --highlight-border: #5c4419;
+    --highlight-ink: #ffcf4d;
   }
 
   * { box-sizing: border-box; }
@@ -394,11 +422,22 @@
     margin: -4px 0 10px;
     min-height: 1em;
   }
-  .gate-fine {
-    font-size: 11.5px;
-    color: var(--ink-muted);
-    margin: 12px 0 0;
+  .cta-highlight {
+    display: block;
+    max-width: 420px;
+    margin: 18px auto 0;
+    padding: 13px 18px;
+    background: var(--highlight-bg);
+    border: 1px solid var(--highlight-border);
+    border-radius: 10px;
+    color: var(--highlight-ink);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
   }
+  a.cta-highlight:hover { filter: brightness(0.96); }
 
   .cohort-summary {
     font-size: 14px;
@@ -532,8 +571,10 @@
         outcome &mdash; which survived, which ran out, and when.
       </p>
       <button type="button" class="gate-submit" id="gateSubmit" style="max-width:320px;margin:0 auto;display:block;">Show the breakdown</button>
-      <p class="gate-fine">If this was useful, subscribing to the channel and liking the video helps a lot &mdash; thanks for following along.</p>
     </div>
+
+    <!-- TODO: once the video is live, replace href="#" below with its URL -->
+    <a class="cta-highlight" href="#">If this was useful, subscribing to the channel and liking the video helps a lot &mdash; thanks for following along!</a>
 
     <div id="cohortContent" hidden>
       <p class="cohort-summary" id="cohortSummary"></p>
@@ -898,6 +939,9 @@ var HORIZON=[20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
 
   gateSubmit.addEventListener("click", function () {
     try { localStorage.setItem("svo_revealed", "1"); } catch (e2) {}
+    // Optional GA4 engagement signal -- safe no-op if GA4 isn't configured
+    // yet or gtag failed to load (ad blockers, etc.).
+    try { if (typeof gtag === "function") gtag("event", "show_breakdown_click"); } catch (e3) {}
     showRevealed();
   });
 
